@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiber Optic Latency Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4fc;
+            border-radius: 4px;
+            display: none;
+        }
+        .results h2 {
+            font-size: 18px;
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .result-item {
+            margin-bottom: 10px;
+        }
+        .result-value {
+            font-weight: bold;
+            color: #2980b9;
+        }
+        .note {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fiber Optic Latency Calculator</h1>
+        
+        <div class="input-group">
+            <label for="distance">Total Distance (km):</label>
+            <input type="number" id="distance" min="0" step="0.1" placeholder="Enter distance in kilometers">
+        </div>
+        
+        <div class="input-group">
+            <label for="roadms">Number of ROADM's (including A & Z locations):</label>
+            <input type="number" id="roadms" min="0" step="1" value="2" placeholder="Enter number of ROADM's">
+        </div>
+        
+        <button onclick="calculateLatency()">Calculate Latency</button>
+        
+        <div class="results" id="results">
+            <h2>Latency Results</h2>
+            
+            <div class="result-item">
+                <span>Total Distance with 12% Slack:</span>
+                <span class="result-value" id="adjusted-distance">0</span> km
+            </div>
+            
+            <div class="result-item">
+                <span>One-Way Latency:</span>
+                <span class="result-value" id="one-way">0</span> ms
+            </div>
+            
+            <div class="result-item">
+                <span>Round-Trip Latency:</span>
+                <span class="result-value" id="round-trip">0</span> ms
+            </div>
+        </div>
+        
+        <div class="note">
+            Note: This calculator provides ESTIMATED latency values only. For SLA latency information, please consult with Wave Engineering. The calculation adds 12% to the distance to account for slack coils and factors in ROADM nodes.
+        </div>
+    </div>
+
+    <script>
+        function calculateLatency() {
+            // Get input values
+            const distance = parseFloat(document.getElementById('distance').value);
+            const roadms = parseInt(document.getElementById('roadms').value);
+            
+            // Validate inputs
+            if (isNaN(distance) || distance < 0) {
+                alert("Please enter a valid distance");
+                return;
+            }
+            
+            if (isNaN(roadms) || roadms < 0) {
+                alert("Please enter a valid number of ROADM's");
+                return;
+            }
+            
+            // Calculate adjusted distance with 12% slack
+            const adjustedDistance = distance * 1.12;
+            
+            // Calculate latency
+            // Speed of light in fiber is approximately 4.9 microseconds per kilometer
+            // Adding 10 microseconds per ROADM for switching delay
+            const speedOfLightInFiber = 4.9; // microseconds per km
+            const roadmDelay = 10; // microseconds per ROADM
+            
+            // Calculate one-way latency in microseconds
+            const oneWayMicroseconds = (adjustedDistance * speedOfLightInFiber) + (roadms * roadmDelay);
+            
+            // Convert to milliseconds
+            const oneWayMs = oneWayMicroseconds / 1000;
+            const roundTripMs = oneWayMs * 2;
+            
+            // Display results
+            document.getElementById('adjusted-distance').textContent = adjustedDistance.toFixed(2);
+            document.getElementById('one-way').textContent = oneWayMs.toFixed(4);
+            document.getElementById('round-trip').textContent = roundTripMs.toFixed(4);
+            
+            // Show results
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
